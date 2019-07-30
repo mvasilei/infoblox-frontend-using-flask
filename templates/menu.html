@@ -1,0 +1,26 @@
+<link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
+<form action="/menu" method="POST">
+    <div class="login">
+        <div class="login-screen">
+            <div class="login-form">
+                <label class="login-field-icon fui-lock" for="login-pass"></label>
+            </div>
+            <div class="control-group">
+                <input type="submit" name="menu" value="Search IP" class="btn btn-primary btn-large btn-block">
+            </div>
+            <div class="control-group">
+                <input type="submit" name="menu" value="Search MAC" class="btn btn-primary btn-large btn-block">
+            </div>
+            <div class="control-group">
+                <input type="submit" name="menu" value="Create Host Record" class="btn btn-primary btn-large btn-block">
+            </div>
+            <div class="control-group">
+                <input type="submit" name="menu" value="Delete Host Record" class="btn btn-primary btn-large btn-block">
+            </div>
+            <div class="control-group">
+                <input type="submit" name="menu" value="Logout" class="btn btn-primary btn-large btn-block">
+            </div>
+            </div>
+        </div>
+    </div>
+</form>

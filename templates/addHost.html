@@ -1,0 +1,22 @@
+<link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
+<form action="/addhost" method="POST">
+	<div class="login">
+		<div class="login-screen">
+			<div class="login-form">
+				<div class="control-group">
+					<p><input type="text" class="login-field" value="" placeholder="Host Name" name="Name"></p>
+                    <p><input type="text" class="login-field" value="" placeholder="IP 147.188.x.x" name="IP"></p>
+                    <p><input type="text" class="login-field" value="" placeholder="MAC H:H:H:H" name="MAC"></p>
+                    <input type="text" class="login-field" value="" placeholder="Comments" name="Comment">
+					<label class="login-field-icon fui-user" for="login-name"></label>
+				</div>
+		        		<input type="submit" name="submit" value="Add" class="btn-parallel ad-left">
+					    <input type="submit" name="submit" value="Menu" class="btn-parallel ad-right">
+                        {% if error %}
+                        <p><strong>{{ error }}</strong>
+			            {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
