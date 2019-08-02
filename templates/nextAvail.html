@@ -1,0 +1,22 @@
+<link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
+<form action=/nextavail method="POST">
+	<div class="login">
+		<div class="login-screen">
+			<div class="login-form">
+				<div class="control-group">
+					{% if subnets|count != 0 %}
+                    <select name="networks" method="POST" action=/nextavail>
+					    {% for network in subnets %}
+					    <option value="{{network}}">{{network}}</option>
+					    {% endfor %}
+				    </select>
+					<p>	<input type="submit" name="submit" value="Submit" class="btn ad-right"> </p>
+					{% endif %}
+					<p><strong>{{available}}</strong></p>
+
+					<p>	<input type="submit" name="submit" value="Menu" class="btn ad-right"> </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -7,6 +7,7 @@ import os
 import re
 import getpass3
 import json
+import string
 from flask import Flask
 from flask import Flask, flash, redirect, render_template, request, session, abort
 
@@ -42,7 +43,7 @@ def login():
 @infoblox.route('/searchIP', methods=['POST'])
 def searchip():
     response = None
-
+    #If button clicked = Search, proceed looking up the IP
     if request.form['submit'] == 'Search':
         # Input sanitation
         if not (re.match(r"^147.188.(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",request.form['IP'])):
@@ -67,7 +68,8 @@ def searchip():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return ('', 204)
+    #under normal circumstances this is never executed however flask requires a return http value 204 = No content
+    return('', 204)
 
 @infoblox.route('/searchMAC', methods=['POST'])
 def searchmac():
@@ -76,24 +78,31 @@ def searchmac():
             error = 'Invalid MAC Value'
             return render_template('searchMAC.html', error=error)
 
-        r = requests.get(ADDRESS + 'search?mac_address=' + request.form['MAC'] + '&_return_as_object=0',
+        mac = request.form['MAC'].replace('-',':').lower()
+        r = requests.get(ADDRESS + 'search?mac_address=' + mac + '&_return_as_object=0',
                          cookies=request_cookies,
                          verify=valid_cert)
 
         if r.status_code != requests.codes.ok:
-            print('search_address', r.text)
             exit_msg = 'Error {} finding host by MAC: {}'
             sys.exit(exit_msg.format(r.status_code, r.reason))
 
-        response=r.json()
+        response = r.json()
 
         if response:
             print(response)
             for dict in response:
-                if  dict['ipv4addr']:
-                    r = requests.get(ADDRESS + 'search?address=' + dict['ipv4addr'] + '&_return_as_object=0',
-                             cookies=request_cookies,
-                             verify=valid_cert)
+                if 'record:host' in dict['_ref']:
+                    if dict['ipv4addrs']:
+                        for item in dict['ipv4addrs']:
+                            r = requests.get(ADDRESS + 'search?address=' + item['ipv4addr'] + '&_return_as_object=0',
+                                         cookies=request_cookies,
+                                         verify=valid_cert)
+                else:
+                    if dict['ipv4addr']:
+                        r = requests.get(ADDRESS + 'search?address=' + dict['ipv4addr'] + '&_return_as_object=0',
+                                 cookies=request_cookies,
+                                 verify=valid_cert)
 
             response=r.json()
             print(response)
@@ -104,7 +113,7 @@ def searchmac():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return ('', 204)
+    return('', 204)
 
 @infoblox.route('/addhost', methods=['POST','PUT'])
 def addhost():
@@ -117,7 +126,9 @@ def addhost():
         elif not request.form['Name']:
             return render_template('addHost.html', error='Host Name is required')
 
-            data = {'name': request.form['Name'],'ipv4addrs': [{"ipv4addr":request.form['IP']}]}#,'mac_address':request.form['MAC'],'configure_for_dhcp': True,'view': 'default'}
+            mac = request.form['MAC'].replace('-', ':')
+            data = {'name': request.form['Name'],'ipv4addrs': [{"ipv4addr":request.form['IP']}],'mac_address':mac.lower(),'configure_for_dhcp': True,'view': 'default','comment':request.form['Comment']}
+
             r=requests.request('POST', ADDRESS + 'record:host',
                              data=json.dumps(data),
                              headers={'Content-Type': 'application/json'},
@@ -130,7 +141,7 @@ def addhost():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return ('', 204)
+    return('', 204)
 
 @infoblox.route('/delhost', methods=['POST','DELETE'])
 def delhost():
@@ -148,6 +159,7 @@ def delhost():
         response=r.json()
         print(response)
 
+        #If record exists delete it
         if len(response):
             r = requests.request('DELETE', ADDRESS + response[0]['_ref'],
                              headers={'Content-Type': 'application/json'},
@@ -164,7 +176,72 @@ def delhost():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return ('', 204)
+    return('', 204)
+
+def configured_subnets():
+    subnets = []
+
+    # Query all subnets in 147.188.0.0/16
+    r = requests.get(ADDRESS + 'network?network_container=147.188.0.0/16',
+                     cookies=request_cookies,
+                     verify=valid_cert)
+
+    # On success create a drop down list
+    if r.status_code == requests.codes.ok:
+        response = r.json()
+
+        for dict in response:
+            network = dict['network']
+            subnets.append(network)
+
+        return render_template('nextAvail.html', subnets=subnets)
+
+@infoblox.route('/nextavail', methods=['POST'])
+def nextavail():
+    available = ''
+
+    r = requests.get(ADDRESS + 'network?network_container=147.188.0.0/16',
+                     cookies=request_cookies,
+                     verify=valid_cert)
+
+    if r.status_code == requests.codes.ok:
+        response = r.json()
+
+        if request.method == 'POST':
+            select = request.form.get('networks')
+            print(select)
+            if request.form['submit'] == 'Submit':
+                if r.status_code == requests.codes.ok:
+                    response = r.json()
+
+                    for dict in response:
+
+                        if str(select) in dict['_ref']:
+                            headers = {
+                                'content-type': 'application/json',
+                            }
+                            params = (
+                                ('_function', 'next_available_ip'),
+                                ('_return_as_object', '1'),
+                            )
+                            data = '{"num":1}'
+                            r = requests.post(ADDRESS + dict['_ref'],
+                                                     headers=headers,
+                                                     params=params,
+                                                     data=data,
+                                                     cookies=request_cookies,
+                                                     verify=valid_cert)
+
+                            result = r.json()
+
+                            if 'Error' in result:
+                                return render_template('nextAvail.html', subnets=[], available=result['Error'])
+                            else:
+                                return render_template('nextAvail.html', subnets=[], available=result['result']['ips'])
+            elif request.form['submit'] == 'Menu':
+                return render_template('menu.html')
+
+    return ('',204)
 
 @infoblox.route('/results', methods=['POST'])
 def results():
@@ -198,6 +275,8 @@ def menu():
         return render_template('addHost.html')
     elif request.form['menu'] =='Delete Host Record':
         return render_template('delHost.html')
+    elif request.form['menu'] =='Search Next Available IP':
+        return configured_subnets()
     elif request.form['menu'] == 'Logout':
         return render_template('login.html')
 
@@ -205,5 +284,5 @@ def menu():
 
 if __name__ == '__main__':
     infoblox.secret_key = os.urandom(12)
-    infoblox.run(debug=True, host='0.0.0.0', port=4000)
+    infoblox.run(debug=True, host='0.0.0.0', port=4000, ssl_context=('cert.pem', 'key.pem'))
     logout(request_cookies)

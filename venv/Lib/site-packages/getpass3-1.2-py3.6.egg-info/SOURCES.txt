@@ -1,0 +1,8 @@
+README.md
+setup.cfg
+setup.py
+getpass3/getpass3.py
+getpass3.egg-info/PKG-INFO
+getpass3.egg-info/SOURCES.txt
+getpass3.egg-info/dependency_links.txt
+getpass3.egg-info/top_level.txt

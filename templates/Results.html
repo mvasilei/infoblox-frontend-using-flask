@@ -3,17 +3,37 @@
 	<div class="login">
 		<div class="login-screen">
 			<div class="result-form" allign="left">
+                <!-- if not empty response and if record is not network or network view display results -->
                 {% for dict in response %}
                     {% if dict['_ref'] %}
-                        <p><strong>IP address:</strong> {{dict['ipv4addr']}}</p>
-                        <p><strong>Name:</strong> {{dict['name']}}</p>
-                        <p><strong>MAC:</strong> {{dict['mac']}} {{dict['mac_address']}}</p>
+                        {% if 'network' not in dict['_ref'] %}
                         <p><strong>Type:</strong> {{dict['_ref'].split('/')[0]}}</p>
+                        {% endif %}
+                        {% if 'record:host' in dict['_ref'] %}
+                            {% for item in dict['ipv4addrs'] %}
+                                <p><strong>IP address:</strong> {{item['ipv4addr']}}</p>
+                            {% endfor %}
+                        <p><strong>Name:</strong> {{dict['name']}} </p>
                         <p><strong>View:</strong> {{dict['view']}}</p>
+                        {% elif 'fixedaddress' in dict['_ref'] %}
+                        <p><strong>IP address:</strong> {{dict['ipv4addr']}} {{dict['ip_address']}}</p>
+                        <p><strong>View:</strong> {{dict['view']}} {{dict['network_view']}}</p>
+                        {% elif 'record:ptr' in dict['_ref'] %}
+                        <p><strong>Name:</strong> {{dict['ptrdname']}} </p>
+                        <p><strong>View:</strong> {{dict['view']}}</p>
+                        {% elif 'record:a' in dict['_ref'] %}
+                        <p><strong>IP address:</strong> {{dict['ipv4addr']}}</p>
+                        <p><strong>Name:</strong> {{dict['name']}} </p>
+                        <p><strong>View:</strong> {{dict['view']}}</p>
+                        {% elif 'ipv4address' in dict['_ref'] %}
+                        <p><strong>IP address:</strong> {{dict['ip_address']}}</p>
+                        <p><strong>MAC address:</strong> {{dict['mac_address']}}</p>
+                        <p><strong>Name:</strong> {{dict['names']}} </p>
+                        <p><strong>View:</strong> {{dict['network_view']}}</p>
+                        {% endif %}
                     {% else %}
                         <p><strong>No record found</strong></p>
                     {% endif %}
-                    <p></p>
                 {% endfor %}
                 <p>
 				<input type="submit" name="submit" value="Menu" class="btn ad-right">
