@@ -38,6 +38,7 @@ def login():
     ibapauth_cookie = r.cookies['ibapauth']
     print('Authentication cookie: ', ibapauth_cookie)
     request_cookies = {'ibapauth': ibapauth_cookie}
+
     return render_template('menu.html')
 
 @infoblox.route('/searchIP', methods=['POST'])
@@ -68,8 +69,7 @@ def searchip():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    #under normal circumstances this is never executed however flask requires a return http value 204 = No content
-    return('', 204)
+    return render_template('menu.html')
 
 @infoblox.route('/searchMAC', methods=['POST'])
 def searchmac():
@@ -113,7 +113,7 @@ def searchmac():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return('', 204)
+    return render_template('menu.html')
 
 @infoblox.route('/addhost', methods=['POST','PUT'])
 def addhost():
@@ -141,7 +141,7 @@ def addhost():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return('', 204)
+    return render_template('menu.html')
 
 @infoblox.route('/delhost', methods=['POST','DELETE'])
 def delhost():
@@ -176,7 +176,7 @@ def delhost():
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
-    return('', 204)
+    return render_template('menu.html')
 
 def configured_subnets():
     subnets = []
@@ -241,7 +241,7 @@ def nextavail():
             elif request.form['submit'] == 'Menu':
                 return render_template('menu.html')
 
-    return ('',204)
+        return render_template('menu.html')
 
 @infoblox.route('/results', methods=['POST'])
 def results():
@@ -280,7 +280,13 @@ def menu():
     elif request.form['menu'] == 'Logout':
         return render_template('login.html')
 
-    return ('', 204)
+    return render_template('menu.html')
+
+def on_backbutton_clicked(self, widget):
+    self.webview.go_back()
+
+def on_forwardbutton_clicked(self, widget):
+    self.webview.go_forward()
 
 if __name__ == '__main__':
     infoblox.secret_key = os.urandom(12)

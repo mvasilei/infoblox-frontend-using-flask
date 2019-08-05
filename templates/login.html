@@ -1,3 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IFE: Search Results</title>
+</head>
+ <!--   <script type="text/javascript">
+        window.history.pushState(null, "IFE: Menu", "{{url_for('menu')}}");
+        window.addEventListener('popstate', function (event)
+        {
+          window.history.pushState(null, "IFE: Menu", "{{url_for('menu')}}");
+        });
+    </script>-->
+<body>
 <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
 <form action="/login" method="POST">
 	<div class="login">
@@ -22,3 +36,5 @@
 		</div>
 	</div>
 </form>
+</body>
+</html>

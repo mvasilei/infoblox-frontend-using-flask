@@ -1,8 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IFE: Search Results</title>
+</head>
+<body>
 <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
-<form action="/results" method="POST">
+<form action="/results" method="POST" onload="noforward()">
 	<div class="login">
 		<div class="login-screen">
-			<div class="result-form" allign="left">
+			<div class="result-form">
                 <!-- if not empty response and if record is not network or network view display results -->
                 {% for dict in response %}
                     {% if dict['_ref'] %}
@@ -42,3 +49,5 @@
         </div>
     </div>
 </form>
+</body>
+</html>

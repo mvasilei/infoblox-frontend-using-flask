@@ -28,6 +28,7 @@ color: #777;
 .login-form {
 text-align: center;
 }
+
 .result-form {
 text-align: left;
 }
@@ -81,21 +82,8 @@ display: block;
 margin-top: 12px;
 }
 
-.ad-left {
-  float: left;
-  margin:auto 0;
-}
-
-.ad-right {
-  overflow: hidden;
-  margin:auto 0;
-}
-
-.entire-thing {
-  width: 250px;
-}
-
 .btn-parallel {
+display: inline-block;
 border: 2px solid transparent;
 background: #3498DB;
 color: #ffffff;
@@ -107,7 +95,6 @@ text-shadow: none;
 border-radius: 3px;
 box-shadow: none;
 transition: 0.25s;
-display: block;
 width: 100px;
 margin: 0 auto;
 }
