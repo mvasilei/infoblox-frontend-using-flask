@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IFE: Delete host by IP</title>
+    <title>IFE: Delete host by MAC</title>
 </head>
 <body>
 <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
-<form action="/delhost" method="POST">
+<form action="/delhostmac" method="POST">
 	<div class="login">
 		<div class="login-screen">
 			<div class="login-form">
 				<div class="control-group">
-					<p><input type="text" class="login-field" value="" placeholder="Host Name" name="Name"></p>
-                    <input type="text" class="login-field" value="" placeholder="IP 147.188.x.x" name="IP">
+                    <input type="text" class="login-field" value="" placeholder="MAC h:h:h:h:h:h" name="IP">
 					<label class="login-field-icon fui-user" for="login-name"></label>
 				</div>
 				<div class="control-group">

@@ -10,7 +10,7 @@
 	<div class="login">
 		<div class="login-screen">
 			<div class="result-form">
-                <!-- if not empty response and if record is not network or network view display results -->
+                <!-- if not empty response and if record is not network or networkview display results -->
                 {% for dict in response %}
                     {% if dict['_ref'] %}
                         {% if 'network' not in dict['_ref'] %}
@@ -38,12 +38,14 @@
                         <p><strong>Name:</strong> {{dict['names']}} </p>
                         <p><strong>View:</strong> {{dict['network_view']}}</p>
                         {% endif %}
-                    {% else %}
-                        <p><strong>No record found</strong></p>
                     {% endif %}
                 {% endfor %}
+
+                {% if flag == False %}
+                    <p><strong>{{response}}</strong></p>
+                {% endif %}
                 <p>
-				<input type="submit" name="submit" value="Menu" class="btn ad-right">
+				<input type="submit" name="submit" value="Menu" class="btn">
                 </div>
             </div>
         </div>

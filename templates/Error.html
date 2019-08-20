@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IFE: Error</title>
+</head>
+<body>
+<link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
+<form action="/error" method="POST">
+	<div class="login">
+		<div class="control-group">
+            <p><strong>{{ reason }}</strong>
+            <input type="submit" name="submit" value="Menu" class="btn-parallel">
+         </div>
+    </div>
+</form>
+</body>
+</html>

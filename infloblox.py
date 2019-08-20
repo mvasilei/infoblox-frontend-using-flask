@@ -55,12 +55,12 @@ def searchip():
                          verify=valid_cert)
 
         if r.status_code != requests.codes.ok:
-            print('search_address', r.text)
-            exit_msg = 'Error {} finding host by IP: {}'
-            sys.exit(exit_msg.format(r.status_code, r.reason))
+            if r.status_code == 401:
+                return render_template('login.html', reason=r.reason)
+            else:
+                return render_template('Error.html', reason=r.reason)
 
         response=r.json()
-        print(response)
 
         if response:
             return render_template('Results.html', response=response)
@@ -84,32 +84,17 @@ def searchmac():
                          verify=valid_cert)
 
         if r.status_code != requests.codes.ok:
-            exit_msg = 'Error {} finding host by MAC: {}'
-            sys.exit(exit_msg.format(r.status_code, r.reason))
+            if r.status_code == 401:
+                return render_template('login.html', reason=r.reason)
+            else:
+                return render_template('Error.html', reason=r.reason)
 
         response = r.json()
 
         if response:
-            print(response)
-            for dict in response:
-                if 'record:host' in dict['_ref']:
-                    if dict['ipv4addrs']:
-                        for item in dict['ipv4addrs']:
-                            r = requests.get(ADDRESS + 'search?address=' + item['ipv4addr'] + '&_return_as_object=0',
-                                         cookies=request_cookies,
-                                         verify=valid_cert)
-                else:
-                    if dict['ipv4addr']:
-                        r = requests.get(ADDRESS + 'search?address=' + dict['ipv4addr'] + '&_return_as_object=0',
-                                 cookies=request_cookies,
-                                 verify=valid_cert)
-
-            response=r.json()
-            print(response)
-
             return render_template('Results.html', response=response)
         else:
-            return render_template('Results.html', response={})
+            return render_template('Results.html', response='No record found for MAC: ' + mac, flag=False)
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
@@ -126,22 +111,41 @@ def addhost():
         elif not request.form['Name']:
             return render_template('addHost.html', error='Host Name is required')
 
-            mac = request.form['MAC'].replace('-', ':')
-            data = {'name': request.form['Name'],'ipv4addrs': [{"ipv4addr":request.form['IP']}],'mac_address':mac.lower(),'configure_for_dhcp': True,'view': 'default','comment':request.form['Comment']}
+        mac = request.form['MAC'].replace('-', ':')
+        data = {'name': request.form['Name'].lower(),
+                'ipv4addrs': [{'configure_for_dhcp': True,'ipv4addr':request.form['IP'],'mac':mac.lower()}],
+                'view': 'default','comment':request.form['Comment']}
 
-            r=requests.request('POST', ADDRESS + 'record:host',
-                             data=json.dumps(data),
-                             headers={'Content-Type': 'application/json'},
-                             cookies=request_cookies,
-                             verify=valid_cert)
+        r=requests.request('POST', ADDRESS + 'record:host',
+                         data=json.dumps(data),
+                         headers={'Content-Type': 'application/json'},
+                         cookies=request_cookies,
+                         verify=valid_cert)
 
-            return render_template('addHost.html', error=r[0]['text'])
+        if r.status_code != requests.codes.ok:
+            if r.status_code == 401:
+                return render_template('login.html', reason=r.reason)
+            else:
+                return render_template('Error.html', reason=r.reason)
+
+        if 'record:host' in r:
+            return render_template('addHost.html', error='Record Created successfully')
         else:
-            return render_template('addHost.html', error='Host already exists')
+            return render_template('addHost.html', error=response['text'])
+
     elif request.form['submit'] == 'Menu':
         return render_template('menu.html')
 
     return render_template('menu.html')
+
+@infoblox.route('/error', methods=['POST'])
+def error():
+    if request.form['submit'] == 'Menu':
+        return render_template('menu.html')
+
+@infoblox.route('/delhostmac', methods=['POST','DELETE'])
+def delhostmac():
+    return ('',204)
 
 @infoblox.route('/delhost', methods=['POST','DELETE'])
 def delhost():
@@ -273,7 +277,9 @@ def menu():
         return render_template('searchMAC.html')
     elif request.form['menu'] =='Create Host Record':
         return render_template('addHost.html')
-    elif request.form['menu'] =='Delete Host Record':
+    elif request.form['menu'] =='Delete Host Record by IP':
+        return render_template('delHostMAC.html')
+    elif request.form['menu'] =='Delete Host Record by MAC':
         return render_template('delHost.html')
     elif request.form['menu'] =='Search Next Available IP':
         return configured_subnets()
